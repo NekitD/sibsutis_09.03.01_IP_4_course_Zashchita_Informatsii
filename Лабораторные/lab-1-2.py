@@ -1,6 +1,10 @@
 import math
 import random
 
+# -----------------------------------------------------------------------
+# Lab 1
+# -----------------------------------------------------------------------
+
 def pow_mod(a, x, p):
     if p == 0:
         raise ValueError("число p не может быть равным 0")
@@ -54,7 +58,7 @@ def generate_prime(a, b):
             return n
     
 
-def generate_num():
+def generate_num_one():
     print("\nВыберите способ ввода чисел a и b:")
     print("1. Ввести с клавиатуры")
     print("2. Сгенерировать случайные числа")
@@ -69,7 +73,7 @@ def generate_num():
             return (a, b)
         except ValueError:
             print("вводите целые числа")
-            return generate_num()
+            return generate_num_one()
     
     elif choice == '2':
         a = random.randint(1, 1000)
@@ -85,10 +89,85 @@ def generate_num():
     
     else:
         print("Неверный выбор")
-        return generate_num()
+        return generate_num_one()
     
-    
-def main():
+# -----------------------------------------------------------------------
+# Lab 2
+# -----------------------------------------------------------------------
+
+def generate_num_two():
+    print("\nВыберите способ ввода чисел a, y, p:")
+    print("1. Ввести с клавиатуры")
+    print("2. Сгенерировать случайные числа")
+    choice = input("Вариант(1-2): ")
+    if choice == '1':
+        try:
+            a = int(input("Введите a: "))
+            y = int(input("Введите y: "))
+            p = int(input("Введите p: "))
+            if not p > y:
+                print("Не выполнено условие: p > y")
+                return generate_num_two()
+            return a, y, p
+        except ValueError:
+            print("вводите целые числа")
+            return generate_num_two()
+    elif choice == '2':
+        a = random.randint(1, 1000)
+        y = random.randint(1, 999)
+        p = random.randint(y, 1000)
+        print(f"Сгенерированные числа: a = {a}, y = {y}, p = {p}")
+        return a, y, p
+    else:
+        print("Неверный выбор")
+        return generate_num_two()
+
+def baby_giant_step():
+    print()
+    print("Шаг младенца, шаг великана")
+    print("Общий вид задачи: y = a^x mod p, x - ?")
+    a, y, p = generate_num_two()
+    print(f'Итоговый вид задачи: {y} = {a}^x mod {p}, x - ?')
+    m = 2
+    k = p // m + 1
+    m_res = []
+    k_res = []
+    print()
+    print(f'Шаги младенца (0 - {m}): (y * a^j) % p')
+    for j in range(0, m):
+        step_res = [j, (y * (a**j)) % p] # [номер, результат]
+        print(f'Шаг №{j}: ({y} * {a}^{j}) % {p} = {step_res[1]}')
+        m_res.append(step_res)
+    print()
+    print(f'Шаги великана (0 - {k}): a^(i*m) % p')
+    for i in range(1, k+1):
+        step_res = [i, (a**(i*m)) % p] # [номер, результат]
+        print(f'Шаг №{i}: {a}^({i}*{m}) % {p} = {step_res[1]}')
+        k_res.append(step_res)
+
+    x_list = []
+    x_count = 0
+    print()
+    print("Поиск совпавших шагов и подсчёт X: x = i * m - j")
+    print()
+    for baby in m_res:
+        for giant in k_res:
+            if baby[1] == giant[1]: # сравниваем результаты
+                x_val = giant[0] * m - baby[0]
+                print(f'Шаг младенца №{baby[0]} = {baby[1]}')
+                print(f'Шаг великана №{giant[0]} = {giant[1]}')
+                print(f'x = {giant[0]} * {m} - {baby[0]} = {x}')
+                x_count += 1
+                x_list.append(x_count, x_val)
+                print()
+    print("Ответ: ")
+    for x in x_list:
+        print(f'x{x[0]} = {x[1]}')
+
+
+# ====================================================================================
+
+def lab1():
     
     print("\nвозведение числа в степень по модулю:")
     a = 7
@@ -108,7 +187,7 @@ def main():
     print(f"{num}: {status}")
     
     print("\nгенеарция чисел:")
-    a, b = generate_num()
+    a, b = generate_num_one()
     
     print("\nобобщенный алгоритм евклида:")
     gcd, x, y = euclid_gcd(a, b)
@@ -121,7 +200,21 @@ def main():
         print("верно!")
     else:
         print("ошибка!")
+
+def lab2():
+    print("Вычисление дискретного логарифма при помощи алгоритма «Шаг младенца, шаг великана»")
+    baby_giant_step()
         
 if __name__ == "__main__":
-    main()
+    while(True):
+        l = int(input("Введите номер лабораторной (1 - 2) или 0 для выхода: "))
+        if l == 1:
+            lab1()
+        elif l == 2:
+            lab2()
+        elif l == 0:
+            print("Завершение работы!")
+            break
+        else:
+            print("Такой лабораторной нет!")
     
