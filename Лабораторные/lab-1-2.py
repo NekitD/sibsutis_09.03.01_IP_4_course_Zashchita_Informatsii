@@ -156,9 +156,9 @@ def baby_giant_step():
                 x_val = giant[0] * m - baby[0]
                 print(f'Шаг младенца №{baby[0]} = {baby[1]}')
                 print(f'Шаг великана №{giant[0]} = {giant[1]}')
-                print(f'x = {giant[0]} * {m} - {baby[0]} = {x}')
+                print(f'x = {giant[0]} * {m} - {baby[0]} = {x_val}')
                 x_count += 1
-                x_list.append(x_count, x_val)
+                x_list.append([x_count, x_val])
                 print()
     print("Ответ: ")
     for x in x_list:
