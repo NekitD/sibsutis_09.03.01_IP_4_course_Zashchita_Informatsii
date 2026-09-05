@@ -135,13 +135,13 @@ def baby_giant_step():
     print()
     print(f'Шаги младенца (0 - {m}): (y * a^j) % p')
     for j in range(0, m):
-        step_res = [j, (y * (a**j)) % p] # [номер, результат]
+        step_res = [j, (y % p) * pow_mod(a, j, p)] # [номер, результат]
         print(f'Шаг №{j}: ({y} * {a}^{j}) % {p} = {step_res[1]}')
         m_res.append(step_res)
     print()
     print(f'Шаги великана (0 - {k}): a^(i*m) % p')
     for i in range(1, k+1):
-        step_res = [i, (a**(i*m)) % p] # [номер, результат]
+        step_res = [i, pow_mod(a, i*m, p)] # [номер, результат]
         print(f'Шаг №{i}: {a}^({i}*{m}) % {p} = {step_res[1]}')
         k_res.append(step_res)
 
