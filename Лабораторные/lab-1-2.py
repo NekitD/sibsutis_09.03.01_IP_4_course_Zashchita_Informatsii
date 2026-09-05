@@ -130,19 +130,29 @@ def baby_giant_step():
     print(f'Итоговый вид задачи: {y} = {a}^x mod {p}, x - ?')
     m = 2
     k = p // m + 1
+    while k // m > 2:
+        m *= 2
+        k = p // m + 1
     m_res = []
     k_res = []
     print()
+    print(f'm = {m} k = {k}')
+    print()
     print(f'Шаги младенца (0 - {m}): (y * a^j) % p')
     for j in range(0, m):
-        step_res = [j, (y % p) * pow_mod(a, j, p)] # [номер, результат]
+        step_res = [j, (y * (a**j)) % p] # [номер, результат]
         print(f'Шаг №{j}: ({y} * {a}^{j}) % {p} = {step_res[1]}')
         m_res.append(step_res)
     print()
-    print(f'Шаги великана (0 - {k}): a^(i*m) % p')
-    for i in range(1, k+1):
-        step_res = [i, pow_mod(a, i*m, p)] # [номер, результат]
-        print(f'Шаг №{i}: {a}^({i}*{m}) % {p} = {step_res[1]}')
+    print(f'Шаги великана (1): a^(i*m) % p')
+    step_res = [1, pow_mod(a, 1*m, p)] # [номер, результат]
+    print(f'Шаг №{1}: {a}^({1}*{m}) % {p} = {step_res[1]}')
+    k_res.append(step_res)
+    print(f'Шаги великана (2-{k}): k[i-1] * (2^(m) % p) % p')
+    for i in range(2, k+1):
+        prev = step_res[1]
+        step_res = [i, pow_mod(prev * pow_mod(2, m, p), 1, p)] # [номер, результат]
+        print(f'Шаг №{i}: {prev} * ({2}^({m}) % {p}) % {p} = {step_res[1]}')
         k_res.append(step_res)
 
     x_list = []
@@ -161,8 +171,11 @@ def baby_giant_step():
                 x_list.append([x_count, x_val])
                 print()
     print("Ответ: ")
-    for x in x_list:
-        print(f'x{x[0]} = {x[1]}')
+    if len(x_list) > 1:
+        for x in x_list:
+            print(f'x{x[0]} = {x[1]}')
+    else:
+        print(f'x = {x_list[0][1]}')
 
 
 # ====================================================================================
@@ -207,6 +220,7 @@ def lab2():
         
 if __name__ == "__main__":
     while(True):
+        print()
         l = int(input("Введите номер лабораторной (1 - 2) или 0 для выхода: "))
         if l == 1:
             lab1()
