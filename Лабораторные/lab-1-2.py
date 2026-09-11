@@ -10,29 +10,29 @@ def pow_mod(a, x, p):
         raise ValueError("число p не может быть равным 0")
     
     res = 1
-    onestep = a % p #первое действие (0)
-    while x > 0: #для всех систем счисления не равно 0
-        if x & 1: #если бит равен единице(всегда начинает с правого бита, потом будет идти в лево)
-            res = (onestep * res) % p #считаем сразу с модулем, т к при 10^9 общий множитель будет огромным(финальное действие)
-        onestep = pow(onestep, 2) % p  #каждый последующий шаг - возводим в степень остаток предыдущего и делим по модулю
-        x >>= 1 #сдвигаем число на 1 бит в права(не мы сдвигаемся в лево, а двигаем само число, пока не встретим 0 для конца цикла: 1011 -> 0101 -> 0010 -> 0001)
+    onestep = a % p
+    while x > 0:
+        if x & 1:
+            res = (onestep * res) % p
+        onestep = pow(onestep, 2) % p
+        x >>= 1
         
     return res
 
-def test_ferma(n, k=10):
+def test_ferma(n, k=100):
     
     if n <= 1:
-        return False #интервал для a = [2, n-2] не будет сходиться(и число 1 не простое)
+        return False
     if n <= 3:
-        return True #(2 и 3 простые числа, и для 2 интервал пустой, а для 3 - a=2)
-    if n % 2:
-        return False #(из всех четных только 2 - простое)
+        return True
+    if n % 2 == 0:
+        return False
     
-    for i in range(k): #цикл для точности, т к a - рандом на промежутке
-        a = random.randint(2, n - 2) #выбираем a на данном интервале
+    for i in range(k):
+        a = random.randint(2, n - 2)
         
         r = pow_mod(a, n-1, n) # - формула r = a^(n-1) mod n
-        if r != 1: #число будет простым если формула выше равна 1
+        if r != 1:
             return False
         
     return True
@@ -42,8 +42,8 @@ def euclid_gcd(a, b):
     u1, v1 = 1, 0
     u2, v2 = 0, 1
     
-    while b != 0: #как только найдет 0, то запишет предыдущий результат
-        q = a // b # проверка на b>a не нужна, т к он просто выполнит одну операцию, где автоматически поменяется местами
+    while b != 0:
+        q = a // b
         a, b = b, a % b
         
         u1, u2 = u2, u1 - q*u2
@@ -148,11 +148,13 @@ def baby_giant_step():
     step_res = [1, pow_mod(a, 1*m, p)] # [номер, результат]
     print(f'Шаг №{1}: {a}^({1}*{m}) % {p} = {step_res[1]}')
     k_res.append(step_res)
-    print(f'Шаги великана (2-{k}): k[i-1] * (2^(m) % p) % p')
+    print(f'Шаги великана (2-{k}): k[i-1] * (a^(m) % p) % p')
     for i in range(2, k+1):
         prev = step_res[1]
-        step_res = [i, pow_mod(prev * pow_mod(2, m, p), 1, p)] # [номер, результат]
-        print(f'Шаг №{i}: {prev} * ({2}^({m}) % {p}) % {p} = {step_res[1]}')
+        step_res = [i, prev * pow_mod(a, m, p) % p]
+        # step_res = [i, pow_mod(a, i*m, p)]
+        print(f'Шаг №{i}: {prev} * ({a}^({m}) % {p}) % {p} = {step_res[1]}')
+        # print(f'Шаг №{i}: {a}^({i}*{m}) % {p} = {step_res[1]}')
         k_res.append(step_res)
 
     x_list = []
@@ -171,7 +173,9 @@ def baby_giant_step():
                 x_list.append([x_count, x_val])
                 print()
     print("Ответ: ")
-    if len(x_list) > 1:
+    if len(x_list) < 1:
+        print("нет решения")
+    elif len(x_list) > 1:
         for x in x_list:
             print(f'x{x[0]} = {x[1]}')
     else:
