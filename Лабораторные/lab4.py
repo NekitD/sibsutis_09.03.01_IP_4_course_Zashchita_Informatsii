@@ -28,7 +28,7 @@ def file_to_blocks(path, p):
 
     orig_len = len(data)
 
-    block_size = max(1, (p.bit_length() - 1) // 8)
+    block_size = max(1, (p.bit_length() + 7) // 8)
 
     blocks = []
     for i in range(0, len(data), block_size):
@@ -51,31 +51,93 @@ def blocks_to_file(blocks, block_size, orig_len, path):
 def Shamir_encrypt(m, p, Ca, Cb, Da, Db):
     x1 = pow_mod(m, Ca, p)
     x2 = pow_mod(x1, Cb, p)
-    x3 = pow_mod(x2, Da, p)
-    x4 = pow_mod(x3, Db, p)
-    return x4
+    return x2
 
 
 def Shamir_decrypt(m, p, Ca, Cb, Da, Db):
-    x1 = pow_mod(m, Db, p)
-    x2 = pow_mod(x1, Da, p)
-    x3 = pow_mod(x2, Cb, p)
-    x4 = pow_mod(x3, Ca, p)
-    return x4
+    x1 = pow_mod(m, Da, p)
+    x2 = pow_mod(x1, Db, p)
+    return x2
 
+
+# def process_file(in_path, out_path, p, Ca, Cb, Da, Db, decrypt=False):
+#     with open(in_path, 'rb') as f:
+#         raw = f.read()
+
+#     if decrypt:
+#         orig_len = int.from_bytes(raw[:8], 'big')
+#         data = raw[8:]
+#     else:
+#         orig_len = len(raw)
+#         data = raw
+
+#     block_size = max(1, (p.bit_length() + 7) // 8)
+
+#     pad = (-len(data)) % block_size
+#     data += b'\x00' * pad
+
+#     blocks = [int.from_bytes(data[i:i+block_size], 'big')
+#               for i in range(0, len(data), block_size)]
+
+#     out_blocks = []
+#     for m in blocks:
+#         if decrypt:
+#             out_blocks.append(Shamir_decrypt(m, p, Ca, Cb, Da, Db))
+#         else:
+#             out_blocks.append(Shamir_encrypt(m, p, Ca, Cb, Da, Db))
+
+#     out = bytearray()
+#     for b in out_blocks:
+#         out.extend(b.to_bytes(block_size, 'big'))
+
+#     if decrypt:
+#         out = out[:orig_len]
+#     else:
+#         header = orig_len.to_bytes(8, 'big')
+#         out = header + out
+
+#     with open(out_path, 'wb') as f:
+#         f.write(out)
 
 def process_file(in_path, out_path, p, Ca, Cb, Da, Db, decrypt=False):
+    with open(in_path, 'rb') as f:
+        raw = f.read()
 
-    blocks, block_size, orig_len = file_to_blocks(in_path, p)
+    block_size = max(1, (p.bit_length() + 7) // 8)
+
+    if decrypt:
+        orig_len = int.from_bytes(raw[:8], 'big')
+        data = raw[8:]
+    else:
+        orig_len = len(raw)
+        data = raw
+
+    pad = (-len(data)) % block_size
+    data += b'\x00' * pad
+
+    blocks = [int.from_bytes(data[i:i+block_size], 'big')
+              for i in range(0, len(data), block_size)]
+
     out_blocks = []
-
     for m in blocks:
         if decrypt:
             out_blocks.append(Shamir_decrypt(m, p, Ca, Cb, Da, Db))
         else:
             out_blocks.append(Shamir_encrypt(m, p, Ca, Cb, Da, Db))
 
-    blocks_to_file(out_blocks, block_size, orig_len, out_path)
+    out = bytearray()
+    for b in out_blocks:
+        out.extend(b.to_bytes(block_size, 'big'))
+
+    if decrypt:
+        out = out[:orig_len]
+    else:
+
+        header = orig_len.to_bytes(8, 'big')
+        out = header + out
+
+    with open(out_path, 'wb') as f:
+        f.write(out)
 
 
 def input_params():
