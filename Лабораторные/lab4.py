@@ -22,39 +22,10 @@ def generate_CD(p):
             continue
         return C, D
 
-def file_to_blocks(path, p):
-    with open(path, 'rb') as f:
-        data = f.read()
-
-    orig_len = len(data)
-
-    block_size = 1
-    while (1 << (8 * (block_size + 1))) <= p:
-        block_size += 1
-
-    blocks = []
-    for i in range(0, len(data), block_size):
-        chunk = data[i:i + block_size]
-        blocks.append(int.from_bytes(chunk, 'big'))
-
-    return blocks, block_size, orig_len
-
-
-def blocks_to_file(blocks, block_size, orig_len, path):
-    out = bytearray()
-    for b in blocks:
-        out.extend(b.to_bytes(block_size, 'big'))
-    out = bytes(out[:orig_len])
-
-    with open(path, 'wb') as f:
-        f.write(out)
-
-
 def Shamir_encrypt(m, p, Ca, Cb, Da, Db):
     x1 = pow_mod(m, Ca, p)
     x2 = pow_mod(x1, Cb, p)
     return x2
-
 
 def Shamir_decrypt(m, p, Ca, Cb, Da, Db):
     x1 = pow_mod(m, Da, p)
@@ -66,28 +37,31 @@ def process_file(in_path, out_path, p, Ca, Cb, Da, Db, decrypt=False):
         raw = f.read()
 
 
-    read_block_size = (p.bit_length() - 1) // 8
-    if read_block_size < 1:
+    read_block_size = (p.bit_length() - 1) // 8 #всегда m < p, округ.вниз 
+    if read_block_size < 1: #защита от низких p(1байт мин)
         read_block_size = 1
         
-    write_block_size = (p.bit_length() + 7) // 8
+    write_block_size = (p.bit_length() + 7) // 8 #округ. вверх
 
     if decrypt:
-        orig_len = int.from_bytes(raw[:8], 'big')
-        data = raw[8:]
+        orig_len = int.from_bytes(raw[:8], 'big') #первые 8 байт - длина исх файла
+        data = raw[8:] # ост. данные
         in_block_size = write_block_size
         out_block_size = read_block_size
     else:
-        orig_len = len(raw)
+        orig_len = len(raw) #тут весь файл, т к он еще не закодирован
         data = raw
         in_block_size = read_block_size
         out_block_size = write_block_size
 
-    pad = (-len(data)) % in_block_size
-    data += b'\x00' * pad
+    pad = (-len(data)) % in_block_size #добавочные байты для кратности
+    data += b'\x00' * pad #доп.байты в последний блок
 
-    blocks = [int.from_bytes(data[i:i+in_block_size], 'big')
-              for i in range(0, len(data), in_block_size)]
+    blocks = []
+    for i in range(0, len(data), in_block_size):
+        chunk = data[i:i + in_block_size]
+        m = int.from_bytes(chunk, 'big')
+        blocks.append(m)
 
     out_blocks = []
     for m in blocks:
@@ -96,14 +70,14 @@ def process_file(in_path, out_path, p, Ca, Cb, Da, Db, decrypt=False):
         else:
             out_blocks.append(Shamir_encrypt(m, p, Ca, Cb, Da, Db))
 
-    out = bytearray()
+    out = bytearray() #массив байт для итогового файла
     for b in out_blocks:
         out.extend(b.to_bytes(out_block_size, 'big'))
 
     if decrypt:
-        out = out[:orig_len]
+        out = out[:orig_len] #все кроме первых 8 байт
     else:
-        header = orig_len.to_bytes(8, 'big')
+        header = orig_len.to_bytes(8, 'big') #старший байт - первым
         out = header + out
 
     with open(out_path, 'wb') as f:
