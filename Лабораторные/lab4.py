@@ -37,25 +37,25 @@ def process_file(in_path, out_path, p, Ca, Cb, Da, Db, decrypt=False):
         raw = f.read()
 
 
-    read_block_size = (p.bit_length() - 1) // 8 #всегда m < p, округ.вниз 
-    if read_block_size < 1: #защита от низких p(1байт мин)
+    read_block_size = (p.bit_length() - 1) // 8
+    if read_block_size < 1:
         read_block_size = 1
         
-    write_block_size = (p.bit_length() + 7) // 8 #округ. вверх
+    write_block_size = (p.bit_length() + 7) // 8
 
     if decrypt:
-        orig_len = int.from_bytes(raw[:8], 'big') #первые 8 байт - длина исх файла
-        data = raw[8:] # ост. данные
+        orig_len = int.from_bytes(raw[:8], 'big')
+        data = raw[8:]
         in_block_size = write_block_size
         out_block_size = read_block_size
     else:
-        orig_len = len(raw) #тут весь файл, т к он еще не закодирован
+        orig_len = len(raw)
         data = raw
         in_block_size = read_block_size
         out_block_size = write_block_size
 
-    pad = (-len(data)) % in_block_size #добавочные байты для кратности
-    data += b'\x00' * pad #доп.байты в последний блок
+    pad = (-len(data)) % in_block_size
+    data += b'\x00' * pad
 
     blocks = []
     for i in range(0, len(data), in_block_size):
@@ -70,14 +70,14 @@ def process_file(in_path, out_path, p, Ca, Cb, Da, Db, decrypt=False):
         else:
             out_blocks.append(Shamir_encrypt(m, p, Ca, Cb, Da, Db))
 
-    out = bytearray() #массив байт для итогового файла
+    out = bytearray()
     for b in out_blocks:
         out.extend(b.to_bytes(out_block_size, 'big'))
 
     if decrypt:
-        out = out[:orig_len] #все кроме первых 8 байт
+        out = out[:orig_len]
     else:
-        header = orig_len.to_bytes(8, 'big') #старший байт - первым
+        header = orig_len.to_bytes(8, 'big') 
         out = header + out
 
     with open(out_path, 'wb') as f:
