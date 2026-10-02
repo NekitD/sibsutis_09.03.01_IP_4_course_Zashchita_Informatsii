@@ -5,16 +5,10 @@ from lab1_2 import pow_mod, test_ferma, euclid_gcd, generate_prime
 
 FILES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
 
-def modinv(a, m):
-    g, u, v = euclid_gcd(a, m)
-    if g != 1:
-        return None
-    return u % m
-
-def prime_factors(n): #g^((p-1)/q) mod p ≠ 1 Нужна для проверки, что g — первообразный корень по модулю p
+def prime_factors(n):
     factors = set()
     d = 2
-    while d * d <= n: #по корню
+    while d * d <= n:
         while n % d == 0:
             factors.add(d)
             n //= d
@@ -23,7 +17,7 @@ def prime_factors(n): #g^((p-1)/q) mod p ≠ 1 Нужна для проверк�
         factors.add(n)
     return factors
 
-def is_primitive_root(g, p, factors): #проверяем на первообразный корень, из набора простых делителей
+def is_primitive_root(g, p, factors):
     if g <= 1 or g >= p:
         return False
 
