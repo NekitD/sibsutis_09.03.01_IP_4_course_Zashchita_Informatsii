@@ -4,14 +4,6 @@ import os
 from lab1_2 import pow_mod, test_ferma, euclid_gcd, generate_prime
 FILES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
 
-#вместо p у нас n = p*q - задача факторизации(сложно т к p и q еще и большие, а знаем только n)
-#соответственно уже не p-1 для обратного, а φ(n) = (p-1)(q-1)
-#  следствие теоремы Эйлера: m^φ(n) ≡ 1 (mod n) для gcd(m, n) = 1.
-
-#d_B и n_B - открытый ключ Боба
-#c_B и n_B - закрытый ключ Боба
-
-
 
 
 def mod_inverse(a, m):
@@ -51,10 +43,10 @@ def generate_params():
 
         print(f"p   = {p}")
         print(f"q   = {q}")
-        print(f"N_B = {N_B} (модуль)")
+        print(f"N_B = {N_B}")
         print(f"φ   = {phi}")
-        print(f"d_B = {d_B} (открытая экспонента)")
-        print(f"c_B = {c_B} (закрытая экспонента)")
+        print(f"d_B = {d_B}")
+        print(f"c_B = {c_B}")
 
         return p, q, N_B, d_B, c_B
 
@@ -170,7 +162,7 @@ def input_params():
         print("Не удалось вычислить c_B.")
         return input_params()
 
-    print(f"c_B = {c_B}   (закрытая экспонента)")
+    print(f"c_B = {c_B}")
     return p, q, N_B, d_B, c_B
 
 
