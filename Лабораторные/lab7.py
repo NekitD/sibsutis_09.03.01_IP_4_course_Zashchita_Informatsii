@@ -59,14 +59,14 @@ def derive_key_from_secret(secret, key_len_bytes):
     if secret <= 0:
         raise ValueError("Отрицательный секрет.")
 
-    key = b'' #байтовая строка
-    counter = 0 #для разнообразия генерации
+    key = b''
+    counter = 0
     secret_bytes = secret.to_bytes((secret.bit_length() + 7) // 8, 'big')
 
     while len(key) < key_len_bytes:
         h = hashlib.sha256(secret_bytes + counter.to_bytes(4, 'big')).digest()
-        key += h #доб.в строку
-        counter += 1 #снова задаем смещения чтобы блоки не повторялись
+        key += h
+        counter += 1
 
     return key[:key_len_bytes]
 
@@ -96,7 +96,7 @@ def process_file(in_path, out_path, key, decrypt=False):
         if len(key) < len(raw):
             raise ValueError("Ключ короче исходных данных. Шифрование невозможно")
 
-        out = vernam_crypt(raw, key[:len(raw)]) #обрезаем ключ, чтобы не был меньше или больше файла
+        out = vernam_crypt(raw, key[:len(raw)]) 
         out = len(raw).to_bytes(8, 'big') + out
 
     with open(out_path, 'wb') as f:
