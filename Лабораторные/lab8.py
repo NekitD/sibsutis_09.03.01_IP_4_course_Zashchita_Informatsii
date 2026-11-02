@@ -2,9 +2,6 @@ import os
 import hashlib
 import random
 
-#хеш всегда меньше N - иначе проверка упадет(хеш обрежется)
-#поэтому предлагают его резать на куски: т к sha-256 это 256 бит(32байта), а число N = p·q (p,q ≈ 2³²) = ~63бита
-
 from lab1_2 import pow_mod, euclid_gcd, generate_prime
 
 FILES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
@@ -30,7 +27,7 @@ def generate_keys():
         
         phi = (P - 1) * (Q - 1) 
 
-        a_d = 2 ** 16 + 1 #берем поменьше d < phi
+        a_d = 2 ** 16 + 1 #d < phi
         b_d = min(2 ** 20, phi - 1)
 
         if a_d >= b_d:
@@ -49,7 +46,7 @@ def generate_keys():
                 if euclid_gcd(d, phi)[0] == 1:
                     break
 
-        # c из формулы cd mod phi = 1
+        #cd mod phi = 1
         c = find_mod_inverse(d, phi)
         if c is None:
             continue
@@ -70,7 +67,7 @@ def sign_file(in_path, sig_path, N, c):
     signature = bytearray()
     
 
-    for yi in y_bytes: #по каждому байту хеша
+    for yi in y_bytes:
         #4.1: s = y^c mod N
         s = pow_mod(yi, c, N)
         signature += s.to_bytes(block_size, 'big')
@@ -89,7 +86,7 @@ def verify_file(in_path, sig_path, N, d):
         sig_data = f.read()
 
     block_size = (N.bit_length() + 7) // 8
-    expected_len = 32 * block_size # 32 байта хеша * размер блока
+    expected_len = 32 * block_size
 
     if len(sig_data) != expected_len:
         print("Ошибка! Неверный размер файла подписи.")
@@ -97,7 +94,7 @@ def verify_file(in_path, sig_path, N, d):
 
 
     w_bytes = bytearray()
-    for start in range(0, len(sig_data), block_size): # идём по блокам
+    for start in range(0, len(sig_data), block_size):
         s = int.from_bytes(sig_data[start:start + block_size], 'big')
         w_val = pow_mod(s, d, N) #4.3: w = s^d mod N
         if w_val > 255:
