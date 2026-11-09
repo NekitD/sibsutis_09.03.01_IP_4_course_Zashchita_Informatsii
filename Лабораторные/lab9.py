@@ -7,7 +7,6 @@ from lab1_2 import pow_mod, euclid_gcd, generate_prime
 FILES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
 
 def find_mod_inverse(a, m):
-    # Находит a^-1 по модулю m (используется в формуле 4.8)
     g, u, v = euclid_gcd(a, m)
     if g != 1:
         return None
@@ -32,7 +31,6 @@ def generate_keys_elgamal():
     #(4.4): y = g^x mod p
     y = pow_mod(g, x, p)
 
-    # Открытые - p, g, y, секретный - x
     return p, g, y, x
 
 
@@ -43,7 +41,6 @@ def sign_file_elgamal(in_path, sig_path, p, g, x):
     signature = bytearray()
     block_size = (p.bit_length() + 7) // 8
 
-    #Так как хеш может быть больше p, подписываем каждый байт отдельно.
     for h in h_m:
         while True:
             k = random.randint(2, p - 2)
@@ -69,12 +66,9 @@ def sign_file_elgamal(in_path, sig_path, p, g, x):
     with open(sig_path, 'wb') as f:
         f.write(signature)
 
-    print(f"Файл подписан (Эль-Гамаль). Хеш h: {h_m.hex()}")
+    print(f"Файл подписан. Хеш h: {h_m.hex()}")
     print(f"Подпись сохранена в: {sig_path}")
 
-
-#То есть на 1 байт хеша приходится 2 больших числа, и каждое из них занимает block_size/2 байт.
-#При размере блока = 8 байт => Т к хеш = 32байта, то это 32 * (4+4) = 256байт - столько же сколько у rsa.
 
 def verify_file_elgamal(in_path, sig_path, p, g, y):
     with open(sig_path, 'rb') as f:
@@ -113,7 +107,6 @@ def verify_file_elgamal(in_path, sig_path, p, g, y):
 def main():
     print("Электронная подпись Эль-Гамаля")
 
-    print("Генерация ключей...")
     p, g, y, x = generate_keys_elgamal()
     print(f"Открытый ключ: p = {p}")
     print(f"Открытый ключ: g = {g}")
